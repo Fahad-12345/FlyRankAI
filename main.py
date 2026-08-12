@@ -11,7 +11,7 @@ task_list = [
 ]
 
 
-@app.get("/tasks")
+@app.get("/tasks", description="Returns all tasks.")
 def get_tasks():
     return task_list
 
@@ -43,7 +43,7 @@ async def health():
     return {"status": "ok"}
 
 
-@app.post("/tasks", status_code=201)
+@app.post("/tasks", status_code=201, description="Creates a new task.")
 def create_task(data: dict[str, Any]):
 
     if "title" not in data or not isinstance(data["title"], str) or not data["title"].strip():
@@ -63,7 +63,7 @@ def create_task(data: dict[str, Any]):
     task_list.append(new_task)
 
     return new_task
-@app.put("/tasks/{task_id}")
+@app.put("/tasks/{task_id}", description="Updates an existing task.")
 def update_task(task_id: int, data: dict[str, Any]):
 
     if not data:
@@ -102,7 +102,7 @@ def update_task(task_id: int, data: dict[str, Any]):
     )
 
 
-@app.delete("/tasks/{task_id}")
+@app.delete("/tasks/{task_id}", description="Deletes an existing task.")
 def delete_task(task_id: int):
 
     for i, task in enumerate(task_list):
