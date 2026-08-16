@@ -1,1 +1,4 @@
-__pycache__
+__pycache__/
+*.pyc
+
+Week_3/tasks.db
