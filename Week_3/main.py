@@ -11,6 +11,10 @@ DATABASE = "tasks.db"
 class TaskCreate(BaseModel):
     title: str
 
+class TaskUpdate(BaseModel):
+    title: str
+    done: bool
+
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -109,3 +113,70 @@ def create_task(task: TaskCreate):
     conn.close()
 
     return dict(new_task)
+
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, task: TaskUpdate):
+
+    conn = get_db()
+
+    existing = conn.execute(
+        "SELECT id FROM tasks WHERE id = ?",
+        (task_id,)
+    ).fetchone()
+
+    if existing is None:
+        conn.close()
+
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {task_id} not found"}
+        )
+
+    conn.execute(
+        """
+        UPDATE tasks
+        SET title = ?, done = ?
+        WHERE id = ?
+        """,
+        (task.title, task.done, task_id)
+    )
+
+    conn.commit()
+
+    updated = conn.execute(
+        "SELECT id, title, done FROM tasks WHERE id = ?",
+        (task_id,)
+    ).fetchone()
+
+    conn.close()
+
+    return dict(updated)
+
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int):
+
+    conn = get_db()
+
+    existing = conn.execute(
+        "SELECT id FROM tasks WHERE id = ?",
+        (task_id,)
+    ).fetchone()
+
+    if existing is None:
+        conn.close()
+
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {task_id} not found"}
+        )
+
+    conn.execute(
+        "DELETE FROM tasks WHERE id = ?",
+        (task_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return None
