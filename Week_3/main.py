@@ -57,3 +57,22 @@ def get_tasks():
     conn.close()
 
     return [dict(task) for task in tasks]
+
+@app.get("/tasks/{task_id}")
+def get_task(task_id: int):
+    conn = get_db()
+
+    task = conn.execute(
+        "SELECT id, title, done FROM tasks WHERE id = ?",
+        (task_id,)
+    ).fetchone()
+
+    conn.close()
+
+    if task is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "Task not found"}
+        )
+
+    return dict(task)
